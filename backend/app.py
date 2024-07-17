@@ -4,6 +4,7 @@ from utils.face_detection import detect_faces, register_face, recognize_face
 import cv2
 import base64
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +14,12 @@ def detect():
     file = request.files['image']
     img = file.read()
 
+    print("Received image for detection")
+
     result_img = detect_faces(img)
+
+    if result_img is None:
+        return jsonify({'error': 'No faces detected'}), 400
 
     _, buffer = cv2.imencode('.jpg', result_img)
     encoded_img = base64.b64encode(buffer).decode('utf-8')
@@ -21,14 +27,15 @@ def detect():
 
 @app.route('/register', methods=['POST'])
 def register():
+    user_id = request.form['user_id']
     file = request.files['image']
     img = file.read()
-    user_id = request.form['user_id']
 
-    print(f"Received image for user ID: {user_id}")  # デバッグ表示
-    print(f"Image size: {len(img)} bytes")  # 画像サイズを表示
+    print(f"Received image for user ID: {user_id}")
+    print(f"Image size: {len(img)} bytes")
 
-    if register_face(user_id, img):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if register_face(user_id, img, timestamp):
         return jsonify({'status': 'success'})
     else:
         return jsonify({'status': 'failure'})
@@ -37,6 +44,8 @@ def register():
 def recognize():
     file = request.files['image']
     img = file.read()
+
+    print("Received image for recognition")
 
     recognized_user = recognize_face(img)
 

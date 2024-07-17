@@ -6,8 +6,11 @@ import axios from 'axios';
 const HomePage = () => {
   const [detectedImage, setDetectedImage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>('');
+  const [cameraActive, setCameraActive] = useState<boolean>(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -16,6 +19,18 @@ const HomePage = () => {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
       }
+      setCameraActive(true);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
+      }
+      setCameraActive(false);
     }
   };
 
@@ -63,17 +78,24 @@ const HomePage = () => {
           >
             Start Camera
           </button>
-          <video ref={videoRef} width="640" height="480" className="mb-4 border-2 border-gray-300" />
           <canvas ref={canvasRef} width="640" height="480" className="hidden" />
-        </div>
-
-        <div>
+          <button
+            onClick={stopCamera}
+            className="bg-red-500 text-white py-2 px-4 rounded"
+            disabled={!cameraActive}
+          >
+            Stop Camera
+          </button>
           <button
             onClick={() => captureImage('detect')}
             className="bg-green-500 text-white py-2 px-4 rounded m-2"
           >
             Detect Faces
           </button>
+          <video ref={videoRef} width="640" height="480" className="mb-4 border-2 border-gray-300" />
+        </div>
+
+        <div>
           {detectedImage && (
             <div className="mt-4">
               <img src={`data:image/jpeg;base64,${detectedImage}`} alt="Detected Faces" className="border-2 border-gray-300" />
