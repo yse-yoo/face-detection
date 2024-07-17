@@ -2,3 +2,4 @@ flask-backend/*
 node_modules
 __pycache__
 venv
+*/registerd_faces/*
