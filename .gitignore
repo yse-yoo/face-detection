@@ -1,0 +1,4 @@
+flask-backend/*
+node_modules
+__pycache__
+venv
