@@ -9,6 +9,10 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def index():
+    return "Hello, World!"
+
 @app.route('/detect', methods=['POST'])
 def detect():
     file = request.files['image']
